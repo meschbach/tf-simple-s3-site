@@ -21,6 +21,8 @@ resource "aws_cloudfront_distribution" "export" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.cloudfront_id
 
+    compress = true
+
     forwarded_values {
       query_string = false
 
@@ -34,6 +36,11 @@ resource "aws_cloudfront_distribution" "export" {
     min_ttl                = 1
     default_ttl            = 60
     max_ttl                = 60
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.redirect.arn
+    }
   }
 
   price_class = "PriceClass_100"
@@ -46,6 +53,7 @@ resource "aws_cloudfront_distribution" "export" {
       restriction_type = "none"
     }
   }
+
   viewer_certificate {
     acm_certificate_arn = aws_acm_certificate.hosting.arn
     ssl_support_method  = "sni-only"
@@ -60,4 +68,12 @@ resource "aws_cloudfront_origin_access_control" "default" {
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_function" "redirect" {
+  name    = "${var.bucket}-redirect"
+  runtime = "cloudfront-js-2.0"
+  publish = true
+  comment = "Redirects when ending in a slash"
+  code    = file("${path.module}/redirect.js")
 }
