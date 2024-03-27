@@ -24,7 +24,7 @@ future version of the module.
 # Example
 ```terraform
 module "spa" {
-  source = "git::https://github.com/meschbach/tf-simple-s3-site.git#v0.0.1"
+  source = "git::https://github.com/meschbach/tf-simple-s3-site.git?ref=v0.0.1"
   bucket = "website-com-example"
   hostnames = ["example.com"]
   hosted_zone = "example.com"
