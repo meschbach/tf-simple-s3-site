@@ -16,6 +16,11 @@ variable "tags" {
   default = {}
 }
 
+variable "redirect_404_spa" {
+  type    = bool
+  default = false
+}
+
 terraform {
   required_providers {
     aws = {
