@@ -16,6 +16,16 @@ resource "aws_cloudfront_distribution" "export" {
 
   aliases = var.hostnames
 
+  dynamic "custom_error_response" {
+    for_each = var.redirect_404_spa ? [403,404] : []
+    content {
+      error_code            = custom_error_response.value
+      error_caching_min_ttl = 1
+      response_code         = 200
+      response_page_path    = "/index.html"
+    }
+  }
+
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
