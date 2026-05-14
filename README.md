@@ -9,17 +9,38 @@ $0.00 charges for delivery.  Storage will become your dominate segment.
 * `index.html` [rewriting for URLs ending with a `/`](redirect.js), allowing for compatability with standard web
 development practices.
 
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+| ---- | ------- |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.42.0 |
+
+## Providers
+
+| Name | Version |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.45.0 |
+| <a name="provider_aws.us_east_1"></a> [aws.us\_east\_1](#provider\_aws.us\_east\_1) | 6.45.0 |
+
 ## Inputs
-Please look at [input.tf](input.tf) for a comprehensive list.  Please note the following:
-* You'll need to configure an AWS provider to specifically run in `us-east-1` for the certificate.  This is required by
-[AWS's CloudFront]().
-* Hosted zone must be a zone within Route 53.  The zone will have entries for DNS based certificate authorization and
-eventually contain both `A` and `AAAA` (IPv6) entries for CloudFront.
-* `Price Class 200` is used to distribute to North America and Europe.  All countries are allowed.  This may change in
-future version of the module.
+
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| <a name="input_bucket"></a> [bucket](#input\_bucket) | Name of the S3 bucket used for static site hosting | `string` | n/a | yes |
+| <a name="input_hosted_zone"></a> [hosted\_zone](#input\_hosted\_zone) | Route53 hosted zone name for DNS records and certificate validation | `string` | n/a | yes |
+| <a name="input_hostnames"></a> [hostnames](#input\_hostnames) | DNS hostnames for the CloudFront distribution. The first entry is used as the primary ACM certificate domain; additional entries become Subject Alternative Names | `list(string)` | n/a | yes |
+| <a name="input_redirect_404_spa"></a> [redirect\_404\_spa](#input\_redirect\_404\_spa) | When true, 403 and 404 errors return 200 with /index.html to support SPA client-side routing | `bool` | `false` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to all resources | `map(string)` | `{}` | no |
 
 ## Outputs
-* `deployer` contains an object with the access key ID and secret to write to the bucket.
+
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_deployer"></a> [deployer](#output\_deployer) | IAM access key and secret for CI/CD deployments to the S3 bucket |
+<!-- END_TF_DOCS -->
+
+> **Note**: You'll need to configure an AWS provider to specifically run in `us-east-1` for the certificate (required by [CloudFront](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-requirements.html)). Hosted zone must exist in Route 53.
 
 # Example
 ```terraform

@@ -11,11 +11,16 @@ OpenTofu/Terraform module for a static S3 site fronted by CloudFront.
 ## Commands
 
 ```sh
-tofu init          # first use or after adding providers
-tofu validate      # validate module
-tofu plan          # dry-run
-tofu apply         # deploy
+tofu init                                   # first use or after adding providers
+tofu validate                               # validate root module (fails — needs alias)
+tofu -chdir=examples/simple init && \
+  tofu -chdir=examples/simple validate      # validate module via example
+tofu plan                                   # dry-run
+tofu apply                                  # deploy
 ```
+
+The root module cannot be validated standalone (requires `us_east_1` provider alias
+from a consumer). Always use `examples/simple` for validation instead.
 
 No lint, test, or codegen commands — this is a pure module.
 

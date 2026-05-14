@@ -10,3 +10,6 @@ repos:
       - id: terraform_trivy
         args:
           - --args=--severity=HIGH,CRITICAL
+      - id: terraform_docs
+        args:
+          - --args=--config=.terraform-docs.yml

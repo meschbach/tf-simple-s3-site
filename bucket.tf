@@ -2,6 +2,32 @@ resource "aws_s3_bucket" "storage" {
   bucket = var.bucket
 }
 
+resource "aws_s3_bucket_versioning" "storage" {
+  bucket = aws_s3_bucket.storage.id
+  versioning_configuration {
+    status = "Disabled"
+  }
+}
+
+#trivy:ignore:AWS-0132: SSE-S3 sufficient; KMS adds cost
+resource "aws_s3_bucket_server_side_encryption_configuration" "storage" {
+  bucket = aws_s3_bucket.storage.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "storage" {
+  bucket                  = aws_s3_bucket.storage.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_website_configuration" "storage" {
   bucket = aws_s3_bucket.storage.bucket
 
@@ -11,36 +37,27 @@ resource "aws_s3_bucket_website_configuration" "storage" {
   index_document {
     suffix = "index.html"
   }
+}
 
-  routing_rule {
-    condition {
-      key_prefix_equals = "/"
+data "aws_iam_policy_document" "storage_cloudfront_access" {
+  statement {
+    sid    = "AllowCloudFrontServicePrincipalReadOnly"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
     }
-    redirect {
-      replace_key_with = "/index.html"
+    actions   = ["s3:GetObject", "s3:ListBucket"]
+    resources = [aws_s3_bucket.storage.arn, "${aws_s3_bucket.storage.arn}/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.export.arn]
     }
   }
 }
 
 resource "aws_s3_bucket_policy" "storage_cloudfront_access" {
   bucket = aws_s3_bucket.storage.bucket
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": {
-        "Sid": "AllowCloudFrontServicePrincipalReadOnly",
-        "Effect": "Allow",
-        "Principal": {
-            "Service": "cloudfront.amazonaws.com"
-        },
-        "Action": ["s3:GetObject", "s3:ListBucket"],
-        "Resource": ["${aws_s3_bucket.storage.arn}","${aws_s3_bucket.storage.arn}/*"],
-        "Condition": {
-            "StringEquals": {
-                "AWS:SourceArn": "${aws_cloudfront_distribution.export.arn}"
-            }
-        }
-    }
-}
-EOF
+  policy = data.aws_iam_policy_document.storage_cloudfront_access.json
 }

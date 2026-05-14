@@ -1,27 +1,26 @@
 resource "aws_iam_user" "deployer" {
+  # checkov:skip=CKV_AWS_273: IAM user intentional for CI/CD access-key workflow
   name = "${var.bucket}-deployer"
 }
 
-resource "aws_iam_user_policy" "deployer_s3_write" {
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "ListObjectsInBucket",
-            "Effect": "Allow",
-            "Action": ["s3:ListBucket"],
-            "Resource": ["arn:aws:s3:::${aws_s3_bucket.storage.bucket}"]
-        },
-        {
-            "Sid": "AllObjectActions",
-            "Effect": "Allow",
-            "Action": "s3:*Object",
-            "Resource": ["arn:aws:s3:::${aws_s3_bucket.storage.bucket}/*"]
-        }
-    ]
+data "aws_iam_policy_document" "deployer_s3_write" {
+  statement {
+    sid       = "ListObjectsInBucket"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${aws_s3_bucket.storage.bucket}"]
+  }
+  statement {
+    sid       = "AllObjectActions"
+    effect    = "Allow"
+    actions   = ["s3:*Object"]
+    resources = ["arn:aws:s3:::${aws_s3_bucket.storage.bucket}/*"]
+  }
 }
-EOF
+
+resource "aws_iam_user_policy" "deployer_s3_write" {
+  # checkov:skip=CKV_AWS_40: IAM user intentionally attached directly for CI/CD access-key workflow
+  policy = data.aws_iam_policy_document.deployer_s3_write.json
   user   = aws_iam_user.deployer.name
 }
 

@@ -3,7 +3,7 @@
 ## Prerequisites
 
 ```sh
-brew install pre-commit checkov trivy
+brew install pre-commit checkov trivy terraform-docs
 ```
 
 ## Setup
@@ -21,7 +21,7 @@ pre-commit run --all-files
 
 # Individual tools
 tofu fmt -check -recursive
-tofu validate      # CI only — requires a calling module's provider context
+tofu -chdir=examples/simple init && tofu -chdir=examples/simple validate
 checkov -d . --framework terraform --compact
 trivy fs --severity HIGH,CRITICAL .
 ```

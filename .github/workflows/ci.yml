@@ -14,10 +14,15 @@ jobs:
 
       - run: tofu fmt -check -recursive
 
-      - run: tofu validate
+      - run: tofu -chdir=examples/simple init && tofu -chdir=examples/simple validate
+
+      - uses: terraform-docs/gh-actions@v1
+        with:
+          config-file: .terraform-docs.yml
+          output-file: README.md
+          output-check: true
+          git-push: false
         continue-on-error: true
-        # Module requires a us-east-1 provider alias from the consumer for ACM;
-        # validation always fails when run standalone.
 
       - uses: terraform-linters/setup-tflint@v4
         continue-on-error: true
