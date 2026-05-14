@@ -2,6 +2,10 @@ locals {
   cloudfront_id = var.bucket
 }
 
+data "aws_cloudfront_cache_policy" "optimized" {
+  name = "Managed-CachingOptimized"
+}
+
 #trivy:ignore:AWS-0011: WAF skipped to minimize cost
 resource "aws_cloudfront_distribution" "export" {
   # checkov:skip=CKV_AWS_86: Access logging skipped to minimize cost
@@ -39,14 +43,11 @@ resource "aws_cloudfront_distribution" "export" {
 
     compress = true
 
-    cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b7a84beefd5"
+    cache_policy_id = data.aws_cloudfront_cache_policy.optimized.id
 
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 1
-    default_ttl            = 60
-    max_ttl                = 60
 
     function_association {
       event_type   = "viewer-request"
