@@ -1,0 +1,37 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: latest
+
+      - run: tofu init
+
+      - run: tofu fmt -check -recursive
+
+      - run: tofu validate
+        continue-on-error: true
+        # Module requires a us-east-1 provider alias from the consumer for ACM;
+        # validation always fails when run standalone.
+
+      - uses: terraform-linters/setup-tflint@v4
+        continue-on-error: true
+
+      - run: tflint --init && tflint --tofu
+        continue-on-error: true
+
+      - uses: bridgecrewio/checkov-action@v12
+        with:
+          framework: terraform
+          compact: true
+
+      - uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL

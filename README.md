@@ -55,3 +55,9 @@ resource "aws_route53_zone" "com_example" {
 This module aims to provide a simple interface to providing the minimal viable target.  There are a number of great
 modules with a ton of tuning knobs which are very hard to understand.  This aims to be simple straight forward
 module to accomplish just serving a static website.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, linting, and CI details.
