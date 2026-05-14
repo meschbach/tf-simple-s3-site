@@ -1,4 +1,10 @@
 resource "aws_s3_bucket" "storage" {
+  # checkov:skip=CKV2_AWS_61: Lifecycle not needed for public static content
+  # checkov:skip=CKV2_AWS_62: Event notifications not applicable to static site
+  # checkov:skip=CKV_AWS_18: Access logging skipped to minimize cost
+  # checkov:skip=CKV_AWS_21: Versioning disabled to avoid serving stale content
+  # checkov:skip=CKV_AWS_144: Cross-region replication not needed for single-region static site
+  # checkov:skip=CKV_AWS_145: SSE-S3 sufficient; KMS adds cost for static content
   bucket = var.bucket
 }
 
@@ -9,6 +15,7 @@ resource "aws_s3_bucket_versioning" "storage" {
   }
 }
 
+# checkov:skip=CKV_AWS_145: SSE-S3 sufficient; KMS adds cost for static content
 #trivy:ignore:AWS-0132: SSE-S3 sufficient; KMS adds cost
 resource "aws_s3_bucket_server_side_encryption_configuration" "storage" {
   bucket = aws_s3_bucket.storage.id
