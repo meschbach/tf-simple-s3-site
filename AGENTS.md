@@ -34,8 +34,6 @@ No lint, test, or codegen commands — this is a pure module.
 
 - **ACM cert must use `aws.us_east_1` provider alias** (CloudFront requirement).
   Consumers must supply a separate `us-east-1` provider alias.
-- `viewer_protocol_policy = "allow-all"` (not redirect-to-https).
-  Not a mistake — this is intentional.
 - `wait_for_deployment = false` on CloudFront — apply returns immediately.
 - `price_class = "PriceClass_100"` (North America + Europe only).
 - `redirect_404_spa` (default `false`): when `true`, 403 and 404 errors return
